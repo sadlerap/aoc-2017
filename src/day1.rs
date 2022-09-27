@@ -1,18 +1,16 @@
-use aoc_runner_derive::{aoc_generator, aoc};
+use aoc_runner_derive::{aoc, aoc_generator};
 
 #[aoc_generator(day1)]
 fn generator(input: &[u8]) -> Vec<u8> {
-    input.iter()
-        .map(|c| c - b'0')
-        .collect()
-        
+    input.iter().map(|c| c - b'0').collect()
 }
 
 fn solve(input: &[u8], offset: usize) -> i32 {
     let offset = offset % input.len();
-    input.iter()
+    input
+        .iter()
         .zip(input[offset..].iter().chain(input[0..offset].iter()))
-        .filter_map(|(a, b)| if a == b {Some(i32::from(*a))} else {None})
+        .filter_map(|(a, b)| if a == b { Some(i32::from(*a)) } else { None })
         .sum()
 }
 
