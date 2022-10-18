@@ -219,71 +219,122 @@ mod tests {
 
         memory.set(1, NonZeroU32::new(1).unwrap());
         assert_eq!(u32::from(memory.get(1).unwrap().unwrap()), 1_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(0, 0)).unwrap().unwrap()), 1_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(0, 0)).unwrap().unwrap()),
+            1_u32
+        );
 
         memory.set(2, NonZeroU32::new(1).unwrap());
         assert_eq!(u32::from(memory.get(2).unwrap().unwrap()), 1_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(1, 0)).unwrap().unwrap()), 1_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(1, 0)).unwrap().unwrap()),
+            1_u32
+        );
 
         memory.set(3, NonZeroU32::new(2).unwrap());
         assert_eq!(u32::from(memory.get(3).unwrap().unwrap()), 2_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(1, 1)).unwrap().unwrap()), 2_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(1, 1)).unwrap().unwrap()),
+            2_u32
+        );
 
         memory.set(4, NonZeroU32::new(4).unwrap());
         assert_eq!(u32::from(memory.get(4).unwrap().unwrap()), 4_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(0, 1)).unwrap().unwrap()), 4_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(0, 1)).unwrap().unwrap()),
+            4_u32
+        );
 
         memory.set(5, NonZeroU32::new(5).unwrap());
         assert_eq!(u32::from(memory.get(5).unwrap().unwrap()), 5_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(-1, 1)).unwrap().unwrap()), 5_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(-1, 1)).unwrap().unwrap()),
+            5_u32
+        );
 
         memory.set(6, NonZeroU32::new(10).unwrap());
         assert_eq!(u32::from(memory.get(6).unwrap().unwrap()), 10_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(-1, 0)).unwrap().unwrap()), 10_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(-1, 0)).unwrap().unwrap()),
+            10_u32
+        );
 
         memory.set(7, NonZeroU32::new(11).unwrap());
         assert_eq!(u32::from(memory.get(7).unwrap().unwrap()), 11_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(-1, -1)).unwrap().unwrap()), 11_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(-1, -1)).unwrap().unwrap()),
+            11_u32
+        );
 
         memory.set(8, NonZeroU32::new(23).unwrap());
         assert_eq!(u32::from(memory.get(8).unwrap().unwrap()), 23_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(0, -1)).unwrap().unwrap()), 23_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(0, -1)).unwrap().unwrap()),
+            23_u32
+        );
 
         memory.set(9, NonZeroU32::new(25).unwrap());
         assert_eq!(u32::from(memory.get(9).unwrap().unwrap()), 25_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(1, -1)).unwrap().unwrap()), 25_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(1, -1)).unwrap().unwrap()),
+            25_u32
+        );
 
         memory.set(10, NonZeroU32::new(26).unwrap());
         assert_eq!(u32::from(memory.get(10).unwrap().unwrap()), 26_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(2, -1)).unwrap().unwrap()), 26_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(2, -1)).unwrap().unwrap()),
+            26_u32
+        );
 
         memory.set(11, NonZeroU32::new(54).unwrap());
         assert_eq!(u32::from(memory.get(11).unwrap().unwrap()), 54_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(2, 0)).unwrap().unwrap()), 54_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(2, 0)).unwrap().unwrap()),
+            54_u32
+        );
 
         memory.set(12, NonZeroU32::new(57).unwrap());
         assert_eq!(u32::from(memory.get(12).unwrap().unwrap()), 57_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(2, 1)).unwrap().unwrap()), 57_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(2, 1)).unwrap().unwrap()),
+            57_u32
+        );
 
         memory.set(13, NonZeroU32::new(59).unwrap());
         assert_eq!(u32::from(memory.get(13).unwrap().unwrap()), 59_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(2, 2)).unwrap().unwrap()), 59_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(2, 2)).unwrap().unwrap()),
+            59_u32
+        );
 
         memory.set(14, NonZeroU32::new(122).unwrap());
         assert_eq!(u32::from(memory.get(14).unwrap().unwrap()), 122_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(1, 2)).unwrap().unwrap()), 122_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(1, 2)).unwrap().unwrap()),
+            122_u32
+        );
 
         memory.set(15, NonZeroU32::new(133).unwrap());
         assert_eq!(u32::from(memory.get(15).unwrap().unwrap()), 133_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(0, 2)).unwrap().unwrap()), 133_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(0, 2)).unwrap().unwrap()),
+            133_u32
+        );
 
         memory.set(16, NonZeroU32::new(142).unwrap());
         assert_eq!(u32::from(memory.get(16).unwrap().unwrap()), 142_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(-1, 2)).unwrap().unwrap()), 142_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(-1, 2)).unwrap().unwrap()),
+            142_u32
+        );
 
         memory.set(17, NonZeroU32::new(147).unwrap());
         assert_eq!(u32::from(memory.get(17).unwrap().unwrap()), 147_u32);
-        assert_eq!(u32::from(memory.get_pos(Position(-2, 2)).unwrap().unwrap()), 147_u32);
+        assert_eq!(
+            u32::from(memory.get_pos(Position(-2, 2)).unwrap().unwrap()),
+            147_u32
+        );
     }
 
     #[test]

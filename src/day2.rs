@@ -27,7 +27,7 @@ impl Row {
 
     fn matching_pair(&self) -> Option<u32> {
         for (i, n) in self.data.iter().enumerate() {
-            for m in self.data[(i+1)..].iter() {
+            for m in self.data[(i + 1)..].iter() {
                 if n % m == 0 {
                     return Some(n / m);
                 } else if m % n == 0 {
