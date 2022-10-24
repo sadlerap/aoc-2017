@@ -39,18 +39,24 @@
 //! Given the initial block counts in your puzzle input, how many redistribution cycles must be
 //! completed before a configuration is produced that has been seen before?
 
-use std::{collections::{BTreeSet, hash_map::DefaultHasher, BTreeMap}, hash::{Hasher, Hash}};
-
+use anyhow::anyhow;
 use aoc_runner_derive::aoc;
+use fxhash::{FxHashMap, FxHashSet};
+use nom::{
+    character::complete::{digit1, space1},
+    combinator::map_res,
+    multi::separated_list1,
+    IResult,
+};
 
 fn parse(input: &str) -> anyhow::Result<Vec<u8>> {
-    input
-        .split_whitespace()
-        .map(|s| s.parse::<u8>())
-        .collect::<Result<_, _>>()
-        .map_err(|e| anyhow::anyhow!("unexpected non-integer: {}", e))
+    let res: IResult<_, _> =
+        separated_list1(space1, map_res(digit1, |s| str::parse::<u8>(s)))(input);
+    res.map(|x| x.1)
+        .map_err(|_| anyhow!("Unexpected non-integer in input"))
 }
 
+#[inline]
 fn step(state: &mut [u8]) {
     let len = state.len();
     let (i, &val) = state
@@ -68,55 +74,55 @@ fn step(state: &mut [u8]) {
 
     state[i] = 0;
 
-    (0..val)
-        .zip(
-            std::iter::repeat(0..len)
-                .flat_map(|x| x.into_iter())
-                .skip(i + 1),
-        )
-        .for_each(|(_, x)| state[x] += 1);
+    let cutoff = usize::from(val) % len;
+    let to_write = u8::try_from(usize::from(val) / len).unwrap();
+    std::iter::repeat(0..len)
+        .flat_map(|x| x)
+        .skip(i + 1)
+        .take(len)
+        .enumerate()
+        .for_each(|(i, x)| {
+            if i >= cutoff {
+                state[x] += to_write;
+            } else {
+                state[x] += to_write + 1;
+            }
+        })
 }
 
 #[aoc(day6, part1)]
 fn part1(input: &str) -> anyhow::Result<u32> {
     let mut data = parse(input)?;
-    let mut seen = BTreeSet::new();
-    let mut x = 0;
+    let mut seen = FxHashSet::default();
     for i in 1.. {
-        let mut hasher: DefaultHasher = Default::default();
-        data.hash(&mut hasher);
-        if !seen.insert(hasher.finish()) {
-            break;
+        let key = fxhash::hash32(&data);
+        if !seen.insert(key) {
+            return Ok(i);
         }
-        x = i;
         step(&mut data);
     }
-    Ok(x)
+    unreachable!()
 }
 
 #[aoc(day6, part2)]
 fn part2(input: &str) -> anyhow::Result<u32> {
     let mut data = parse(input)?;
-    let mut seen = BTreeMap::new();
-    let mut x = 0;
+    let mut seen = FxHashMap::default();
 
     for i in 1_u32.. {
-        let mut hasher: DefaultHasher = Default::default();
-        data.hash(&mut hasher);
-        let key = hasher.finish();
-        if seen.contains_key(&key) {
-            x = i - seen.get(&key).unwrap();
-            break;
+        let key = fxhash::hash32(&data);
+        if let Some(initial_pass) = seen.get(&key) {
+            return Ok(i - initial_pass);
         } else {
             seen.insert(key, i);
         }
         step(&mut data);
     }
-    Ok(x)
+    unreachable!()
 }
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
 
     #[test]
