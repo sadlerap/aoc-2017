@@ -94,7 +94,7 @@ fn step(state: &mut [u8]) {
 fn part1(input: &str) -> anyhow::Result<u32> {
     let mut data = parse(input)?;
     let mut seen = FxHashSet::default();
-    for i in 1.. {
+    for i in 0.. {
         let key = fxhash::hash32(&data);
         if !seen.insert(key) {
             return Ok(i);
@@ -109,7 +109,7 @@ fn part2(input: &str) -> anyhow::Result<u32> {
     let mut data = parse(input)?;
     let mut seen = FxHashMap::default();
 
-    for i in 1_u32.. {
+    for i in 0_u32.. {
         let key = fxhash::hash32(&data);
         if let Some(initial_pass) = seen.get(&key) {
             return Ok(i - initial_pass);
@@ -129,6 +129,12 @@ mod tests {
     fn example_part1() {
         let input = "0 2 7 0";
         assert_eq!(part1(input).unwrap(), 5);
+    }
+
+    #[test]
+    fn example_part2() {
+        let input = "0 2 7 0";
+        assert_eq!(part2(input).unwrap(), 4);
     }
 
     #[test]
