@@ -9,7 +9,11 @@ use nom::{
     sequence::tuple,
     IResult,
 };
-use petgraph::{Graph, dot::{Dot, Config}};
+use petgraph::{
+    graph::NodeIndex,
+    visit::{DfsPostOrder, Walker},
+    Direction, Graph,
+};
 
 #[derive(PartialEq, Eq, Debug)]
 struct Entry<'a> {
@@ -62,44 +66,116 @@ impl<'a> Entry<'a> {
     }
 }
 
-#[aoc(day7, part1)]
-fn part1(input: &str) -> anyhow::Result<String> {
-    let mut graph: Graph<_, ()> = Graph::default();
-    let mut nodes = FxHashMap::default();
-    for line in input.lines() {
-        let e = Entry::parse(line)?;
-        let idx = if let Some(idx) = nodes.get(e.name) {
-            *graph.node_weight_mut(*idx).unwrap() = (e.name, e.weight);
-            *idx
-        } else {
-            let idx = graph.add_node((e.name, e.weight));
-            nodes.insert(e.name, idx);
-            idx
-        };
-        match e.node_type {
-            NodeType::Leaf => {},
-            NodeType::Branch(neighbors) => {
-                for neighbor in neighbors {
-                    let neighbor_idx = if let Some(idx) = nodes.get(neighbor) {
-                        *idx
-                    } else {
-                        let idx = graph.add_node((neighbor, 0));
-                        nodes.insert(neighbor, idx);
-                        idx
-                    };
-                    graph.add_edge(idx, neighbor_idx, ());
+struct Tree<'a> {
+    graph: Graph<(&'a str, u32), ()>,
+    nodes: FxHashMap<&'a str, NodeIndex>,
+}
+
+impl<'a> Tree<'a> {
+    fn parse(input: &'a str) -> anyhow::Result<Self> {
+        let mut graph = Graph::default();
+        let mut nodes = FxHashMap::default();
+
+        for line in input.lines() {
+            let e = Entry::parse(line)?;
+            let idx = if let Some(idx) = nodes.get(e.name) {
+                *graph.node_weight_mut(*idx).unwrap() = (e.name, e.weight);
+                *idx
+            } else {
+                let idx = graph.add_node((e.name, e.weight));
+                nodes.insert(e.name, idx);
+                idx
+            };
+            match e.node_type {
+                NodeType::Leaf => {}
+                NodeType::Branch(neighbors) => {
+                    for neighbor in neighbors {
+                        let neighbor_idx = if let Some(idx) = nodes.get(neighbor) {
+                            *idx
+                        } else {
+                            let idx = graph.add_node((neighbor, 0));
+                            nodes.insert(neighbor, idx);
+                            idx
+                        };
+                        graph.add_edge(idx, neighbor_idx, ());
+                    }
                 }
             }
         }
+
+        Ok(Tree { graph, nodes })
     }
-    println!("{:?}", Dot::with_config(&graph, &[Config::EdgeNoLabel]));
-    let mut root = nodes.iter().map(|x| *x.1).next().unwrap();
-    while let Some(neigh) = graph.neighbors_directed(root, petgraph::Direction::Incoming).next() {
-        root = neigh;
+
+    pub fn root(&self) -> anyhow::Result<&str> {
+        let mut root = self.nodes.iter().map(|x| *x.1).next().unwrap();
+        while let Some(neigh) = self
+            .graph
+            .neighbors_directed(root, Direction::Incoming)
+            .next()
+        {
+            root = neigh;
+        }
+        self.graph
+            .node_weight(root)
+            .map(|w| Ok(w.0))
+            .unwrap_or_else(|| Err(anyhow!("unable to find root of tree!")))
     }
-    graph.node_weight(root)
-        .map(|w| Ok(String::from(w.0)))
-        .unwrap_or_else(|| Err(anyhow!("unable to find root of tree!")))
+
+    pub fn outlier(&self) -> anyhow::Result<u32> {
+        let mut subtree_weights: FxHashMap<NodeIndex, u32> = FxHashMap::default();
+        let root_index = self.nodes[self.root()?];
+        for node in DfsPostOrder::new(&self.graph, root_index).iter(&self.graph) {
+            let outbound_neighbors = self.graph.neighbors_directed(node, Direction::Outgoing);
+            let mut weights = FxHashMap::default();
+            let total_children_weight: u32 = outbound_neighbors
+                .into_iter()
+                .map(|idx| {
+                    let weight = subtree_weights[&idx];
+                    weights.entry(weight).and_modify(|x| *x += 1).or_insert(1);
+                    weight
+                })
+                .sum();
+
+            if let Some(outlier_weight) = weights
+                .iter()
+                .find(|(_, &count)| count == 1)
+                .map(|(weight, _)| weight)
+            {
+                // since we're doing a depth-first traversal, we know that the children of the
+                // node witn an outlier weight are already balanced, so that node must have a
+                // bad weight.
+                let child_weight = subtree_weights
+                    .iter()
+                    .find(|(_, &v)| v == *outlier_weight)
+                    .map(|(&k, _)| self.graph.node_weight(k).map(|(_, x)| x).unwrap())
+                    .unwrap();
+                let common_weight = weights
+                    .iter()
+                    .find(|(_, &count)| count > 1)
+                    .map(|(&x, _)| x)
+                    .unwrap();
+                return Ok(child_weight + common_weight - outlier_weight);
+            }
+            subtree_weights.insert(
+                node,
+                total_children_weight + self.graph.node_weight(node).unwrap().1,
+            );
+        }
+
+        Err(anyhow!("No weight outlier found!"))
+    }
+}
+
+#[aoc(day7, part1)]
+fn part1(input: &str) -> anyhow::Result<String> {
+    let tree = Tree::parse(input)?;
+    tree.root().map(|x| String::from(x))
+}
+
+#[aoc(day7, part2)]
+fn part2(input: &str) -> anyhow::Result<u32> {
+    let tree = Tree::parse(input)?;
+    tree.outlier()
 }
 
 #[cfg(test)]
@@ -147,5 +223,10 @@ cntj (57)";
     #[test]
     fn given_part1() {
         assert_eq!(part1(&GIVEN).unwrap(), "tknk")
+    }
+
+    #[test]
+    fn given_part2() {
+        assert_eq!(part2(&GIVEN).unwrap(), 60)
     }
 }
