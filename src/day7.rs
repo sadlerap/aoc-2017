@@ -3,8 +3,8 @@ use aoc_runner_derive::aoc;
 use fxhash::FxHashMap;
 use nom::{
     bytes::complete::tag,
-    character::complete::{alpha1, digit1, space1},
-    combinator::{map, map_res, opt},
+    character::complete::{alpha1, space1},
+    combinator::{map, opt},
     multi::separated_list0,
     sequence::tuple,
     IResult,
@@ -35,7 +35,7 @@ impl<'a> Entry<'a> {
                 alpha1,
                 space1,
                 tag("("),
-                map_res(digit1, |x| str::parse::<u32>(x)),
+                nom::character::complete::u32,
                 tag(")"),
                 opt(map(
                     tuple((
@@ -169,7 +169,7 @@ impl<'a> Tree<'a> {
 #[aoc(day7, part1)]
 fn part1(input: &str) -> anyhow::Result<String> {
     let tree = Tree::parse(input)?;
-    tree.root().map(|x| String::from(x))
+    tree.root().map(String::from)
 }
 
 #[aoc(day7, part2)]

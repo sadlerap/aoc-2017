@@ -3,10 +3,7 @@ use std::num::ParseIntError;
 use aoc_runner_derive::aoc;
 
 fn parse(input: &str) -> Result<Vec<i32>, ParseIntError> {
-    input
-        .lines()
-        .map(|x| str::parse(x))
-        .collect::<Result<_, _>>()
+    input.lines().map(str::parse).collect::<Result<_, _>>()
 }
 
 fn simulate<F>(stack: &mut [i32], f: F) -> u32

@@ -124,21 +124,6 @@ impl Memory {
 
     fn value_at_pos(&self, pos: &Position) -> u32 {
         pos.num();
-        // let mut acc = 0;
-        // for dx in [-1, 0, 1] {
-        //     for dy in [-1, 0, 1] {
-        //         if dx == 0 && dy == 0 {
-        //             continue;
-        //         }
-        //         let position = Position(pos.0 + dx, pos.1 + dy);
-        //         if let Some(value) = self.get_pos(position) {
-        //             if let Some(x) = value {
-        //                 acc += u32::from(*x);
-        //             }
-        //         }
-        //     }
-        // }
-        // acc
         ([-1, 0, 1])
             .iter()
             .flat_map(|&dx| {
@@ -154,7 +139,7 @@ impl Memory {
                     None
                 }
             })
-            .map(|i| u32::from(i))
+            .map(u32::from)
             .fold(0, std::ops::Add::add)
     }
 }
@@ -181,7 +166,7 @@ fn part2(input: &str) -> u32 {
             memory.set(index as usize, NonZeroU32::new(value).unwrap());
             value
         })
-        .find(|&value| u32::from(value) > num)
+        .find(|&value| value > num)
         .unwrap()
 }
 

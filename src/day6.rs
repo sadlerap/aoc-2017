@@ -50,8 +50,7 @@ use nom::{
 };
 
 fn parse(input: &str) -> anyhow::Result<Vec<u8>> {
-    let res: IResult<_, _> =
-        separated_list1(space1, map_res(digit1, |s| str::parse::<u8>(s)))(input);
+    let res: IResult<_, _> = separated_list1(space1, map_res(digit1, str::parse::<u8>))(input);
     res.map(|x| x.1)
         .map_err(|_| anyhow!("Unexpected non-integer in input"))
 }
@@ -77,7 +76,7 @@ fn step(state: &mut [u8]) {
     let cutoff = usize::from(val) % len;
     let to_write = u8::try_from(usize::from(val) / len).unwrap();
     std::iter::repeat(0..len)
-        .flat_map(|x| x)
+        .flatten()
         .skip(i + 1)
         .take(len)
         .enumerate()

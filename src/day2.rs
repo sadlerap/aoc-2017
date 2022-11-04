@@ -15,7 +15,7 @@ pub struct Row {
 }
 
 impl Row {
-    fn parse<'a>(input: &'a str) -> IResult<&'a str, Self> {
+    fn parse(input: &str) -> IResult<&str, Self> {
         map(
             terminated(
                 separated_list1(space1, map(digit1, |s| str::parse::<u32>(s).unwrap())),
@@ -46,7 +46,7 @@ pub struct Spreadsheet {
 }
 
 impl Spreadsheet {
-    fn parse<'a>(input: &'a str) -> IResult<&str, Spreadsheet> {
+    fn parse(input: &str) -> IResult<&str, Spreadsheet> {
         map(many1(terminated(Row::parse, opt(newline))), |rows| {
             Spreadsheet { rows }
         })(input)
