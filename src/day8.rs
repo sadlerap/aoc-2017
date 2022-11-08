@@ -109,12 +109,7 @@ impl<'reg> Cpu<'reg> {
     }
 
     fn get_register_value(&mut self, reg: &'reg str) -> i32 {
-        if let Some(num) = self.registers.get(reg) {
-            *num
-        } else {
-            self.registers.insert(reg, 0);
-            0
-        }
+        *self.registers.entry(reg).or_default()
     }
 
     fn set_register_value(&mut self, reg: &'reg str, value: i32) {
@@ -183,19 +178,19 @@ mod test {
 
     #[test]
     fn given_input_part1() {
-        let input = "b inc 5 if a > 1
-a inc 1 if b < 5
-c dec -10 if a >= 1
-c inc -20 if c == 10";
+        let input = "b inc 5 if a > 1\n\
+                     a inc 1 if b < 5\n\
+                     c dec -10 if a >= 1\n\
+                     c inc -20 if c == 10\n";
         assert_eq!(part1(input).unwrap(), 1);
     }
 
     #[test]
     fn given_input_part2() {
-        let input = "b inc 5 if a > 1
-a inc 1 if b < 5
-c dec -10 if a >= 1
-c inc -20 if c == 10";
+        let input = "b inc 5 if a > 1\n\
+                     a inc 1 if b < 5\n\
+                     c dec -10 if a >= 1\n\
+                     c inc -20 if c == 10\n";
         assert_eq!(part2(input).unwrap(), 10);
     }
 }
