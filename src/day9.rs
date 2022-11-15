@@ -2,11 +2,11 @@ use anyhow::anyhow;
 use aoc_runner_derive::{aoc, aoc_generator};
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take},
-    character::complete::space0,
+    bytes::complete::{tag, is_not},
+    character::complete::{space0, char, anychar},
     combinator::map,
-    multi::{many_till, separated_list0},
-    sequence::{delimited, preceded, tuple},
+    multi::{fold_many0, separated_list0},
+    sequence::{delimited, tuple, pair},
     IResult,
 };
 
@@ -25,9 +25,9 @@ impl Element {
     }
 
     #[allow(dead_code)]
-    fn garbage(contents: impl Into<String>) -> Self {
+    fn garbage(contents: &str) -> Self {
         Element::Garbage(Garbage {
-            contents: contents.into(),
+            contents_len: contents.len(),
         })
     }
 }
@@ -60,18 +60,17 @@ impl Group {
                 }
             })
             .map(|group| group.score(score + 1))
-            .sum::<u32>() + score
+            .sum::<u32>()
+            + score
     }
 
     // clean up the garbage
     fn recycle(&self) -> usize {
         self.elements
             .iter()
-            .map(|e| {
-                match e {
-                    Element::Garbage(garbage) => garbage.contents.len(),
-                    Element::Group(group) => group.recycle()
-                }
+            .map(|e| match e {
+                Element::Garbage(garbage) => garbage.contents_len,
+                Element::Group(group) => group.recycle(),
             })
             .sum()
     }
@@ -79,22 +78,30 @@ impl Group {
 
 #[derive(Debug, Default, PartialEq, Eq)]
 struct Garbage {
-    contents: String,
+    contents_len: usize,
 }
 
 impl Garbage {
     fn parse(input: &str) -> IResult<&str, Self> {
         map(
-            preceded(tag("<"), many_till(alt((ignore, take(1usize))), tag(">"))),
-            |(contents, _)| Garbage {
-                contents: String::from_iter(contents.iter().cloned()),
+            delimited(
+                tag("<"),
+                fold_many0(
+                    alt((ignore, is_not("!>"))),
+                    || 0,
+                    |acc, x| acc + x.len(),
+                ),
+                tag(">"),
+            ),
+            |contents| Garbage {
+                contents_len: contents,
             },
         )(input)
     }
 }
 
 fn ignore(input: &str) -> IResult<&str, &str> {
-    map(tuple((tag("!"), take(1usize))), |_| "")(input)
+    map(pair(char('!'), anychar), |_| "")(input)
 }
 
 #[aoc_generator(day9)]
@@ -126,7 +133,7 @@ mod tests {
     macro_rules! garbage {
         ( $(($input:expr, $expected:expr)),* ) => {
             $({
-                assert_eq!(Garbage::parse($input), Ok(("", Garbage{ contents: String::from($expected) })));
+                assert_eq!(Garbage::parse($input), Ok(("", Garbage{ contents_len: $expected.len() })));
             })*
         };
     }
@@ -213,7 +220,7 @@ mod tests {
 
     #[test]
     fn score_test() {
-        score!{
+        score! {
             ("{}", 1),
             ("{{{}}}", 6),
             ("{{},{}}", 5),
